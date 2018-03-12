@@ -35,6 +35,8 @@ io.on('connection', function(socket){
     console.log(players);
     console.log(allClients.length);
     console.log('Last :'+allClients[allClients.length-1]);
+	
+	
     if (currentPlayer >= 0){
         players[currentPlayer] = 1;
         allClients[currentPlayer] = socket;
@@ -85,11 +87,13 @@ io.on('connection', function(socket){
     // BONUS
     socket.on('createBonus',function(data)
     {
-        if (!bonus) 
+		console.log("demande au serveur de nouvelles positions pour le bonus");
+		if (!bonus) 
         {
             bonus=true;
             bonusX = (Math.random()*(data.w-200))-(data.w-100)/2+data.w/2;
             bonusY = (Math.random()*(data.h-150))-(data.h-75)/2+data.h/2;
+			console.log("positions du bonus calculées");
             socket.emit('created bonus',{x:bonusX,y:bonusY})
         }
     })
