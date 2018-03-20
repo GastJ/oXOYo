@@ -62,6 +62,7 @@ function create()
     // Ball
 	ball = createBall();
 	ball.tint = 0x000000;
+	// Zone 
 	zone = game.add.sprite(300, h/2, "ball"); 
 	zone.anchor.setTo(0.5,0.5);
 	zone.scale.setTo(0.8,0.8);	
@@ -70,14 +71,25 @@ function create()
 	zone.body.setSize(105, 105, 15, 15);
 	zone.body.immovable = true;
 	zone.tint = 0x2a8931;
+	// Moving zone
+	zone2 = game.add.sprite(500, h/2, "ball"); 
+    zone2.anchor.setTo(0.5,0.5);
+    zone2.scale.setTo(0.8,0.8); 
+    game.physics.arcade.enable([zone2]);
+    zone2.body.setSize(105, 105, 15, 15);
+    zone2.body.velocity.setTo(500,500);
+    zone2.body.collideWorldBounds = true;
+    zone2.body.bounce.set(1);
+    zone2.tint = 0x2a1545;
 
+   	// Timer
 	var me = this;
 	totalTime = 120;
     startTime = 0;
     me.timeElapsed = 0;
  
     createTimer();
-
+    // Start the timer
     if (playerID == 1) 
     {
 	    socket.on("startGame", function(socket){
@@ -98,7 +110,7 @@ function create()
 	    startGame = true;
     }
 
-    // configuration du socket et des handlers
+    // Configuration du socket et des handlers
 	socket.on("mise à jour de la position de la zone", function(data)
 	{	
 		score = data.score;
@@ -107,6 +119,17 @@ function create()
 		socket.emit('transfert position', {x:zone.position.x, y:zone.position.y, score:score})
 		
 	})
+	// Moving zone
+	/*socket.on("mise à jour de la position de la zone2", function(data)
+    {   
+        score = data.score;
+        zone2.position.x = data.x; 
+        zone2.position.y = data.y;  
+        zone2.body.velocity.x = data.x; 
+        zone2.body.velocity.y = data.y;
+        socket.emit('transfert position zone2', {x:zone2.position.x, y:zone2.position.y,x:zone2.body.velocity.x ,y:zone2.body.velocity.y,  score:score})
+        
+    })*/
 	/*socket.on("creation nouvelle dangerZone", function(data){
 		dangerZone = game.add.sprite(data.x, data.y, "ball"); 
 		dangerZone.anchor.setTo(0.5,0.5);
@@ -124,12 +147,20 @@ function create()
 		dangerZone.position.x = data.x; 
 		dangerZone.position.y = data.y;
 	});*/
+	// Position 1st zone
 	socket.on('communication position',function(data)
 	{
 		zone.position.x = data.x; 
 		zone.position.y = data.y;
 		score = data.score
 	});
+	// Position moving zone
+	socket.on('communication position zone2',function(data)
+    {
+        zone2.position.x = data.x; 
+        zone2.position.y = data.y;
+        score = data.score
+    });
 	//Bonus
 	socket.on('bonus reception',function(data)
 	{
@@ -163,12 +194,12 @@ function create()
 	socket.on('reception axe X',function(data)
 	{
 		/*console.log(ball);*/
-		ball.body.velocity.x = data.mouvement;
+		ball.body.velocity.x = data.deplacements;
 		ball.body.position.x = data.position;
 	})
 	socket.on('reception axe Y',function(data)
 	{	/*console.log(ball);*/
-		ball.body.velocity.y = data.mouvement
+		ball.body.velocity.y = data.deplacements;
 		ball.body.position.y = data.position;
 	})
 	/*socket.on('you can move',function()
@@ -260,18 +291,22 @@ var createBall = function()
 	ball_shadow.scale.setTo(0.4,0.4);
 	ball_bloom.scale.setTo(0.15,0.15);
 	game.camera.follow(ball, Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
-
+	gyro.startTracking(function(o) {
+               // updating player velocity
+               ball.body.velocity.x += o.gamma;
+               ball.body.velocity.y += o.beta;
+          });
 	ball.update = function(value, ID){
 		
 		if (ID == 1)
 	    {	
 	        ball.body.velocity.y += value;
-	        socket.emit('Mouvement Y',{deplacements:ball.body.velocity.y, position:ball.body.position.y});
+	        socket.emit('Mouvement Y',{mouvement:ball.body.velocity.y, position:ball.body.position.y});
 	    }
 	    else if (ID == 2)
 	    {
 	        ball.body.velocity.x += value;
-	        socket.emit('Mouvement X',{deplacements:ball.body.velocity.x, position:ball.body.position.x});
+	        socket.emit('Mouvement X',{mouvement:ball.body.velocity.x, position:ball.body.position.x});
 	    }
 
 	    socket.on('reception axe Y',function(data)
@@ -330,7 +365,15 @@ function collisionHandler()
     }
 	/*socket.emit("dangerZone creation", {w:w, h:h});*/
 }
-
+function collisionHandler2()
+{
+    console.log("collision2");
+    socket.emit("Zone2 collision", {w:w, h:h, score:score});
+    if (score >= localStorage.getItem("highscore")) 
+    {
+        highScoreText.text = highScoreString + score;
+    }
+}
 function applyBonus()
 {
 	totalTime += 10;
@@ -369,15 +412,15 @@ function update(){
 			socket.emit('createMalus',{w:w, h:h})
 			/*console.log(bonus);*/
 		}
+		if (playerID==1) 
+		{
+			updatePlayer1();
+		}else if (playerID==2) 
+		{
+			updatePlayer2();
+		}
 	}
 	textScore.setText('Score: '+score, {font: "48px Arial", fill: "#fff"});
-	if (playerID==1) 
-	{
-		updatePlayer1();
-	}else if (playerID==2) 
-	{
-		updatePlayer2();
-	}
 	// Highscore
 	highScoreText.setText('Highscore: '+ localStorage.getItem("highscore"), {font: "48px Arial", fill: "#fff"});
 	if (score > localStorage.getItem("highscore"))
@@ -385,6 +428,7 @@ function update(){
        localStorage.setItem("highscore", score);
     }
 	game.physics.arcade.collide(ball, zone, collisionHandler, null, this);
+	game.physics.arcade.collide(ball, zone2, collisionHandler2, null, this);
 	game.physics.arcade.collide(ball, bonus, applyBonus, null, this);
 	game.physics.arcade.collide(ball, malus, applyMalus, null, this);
 	/*game.physics.arcade.collide(ball, dangerZone, death, null, this);*/

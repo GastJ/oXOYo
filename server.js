@@ -49,17 +49,17 @@ io.on('connection', function(socket){
     }
     socket.on("Mouvement Y",function(data)
     {
-        mouvement = data.deplacements;
+        deplacements = data.deplacements;
         position = data.position;
-        socket.broadcast.emit('reception axe Y',{mouvement: mouvement, position:position})
+        socket.broadcast.emit('reception axe Y',{deplacements: deplacements, position:position})
     })
     socket.on("Mouvement X",function(data)
     {
-        mouvement = data.deplacements;
+        deplacements = data.deplacements;
         position = data.position;
-        socket.broadcast.emit('reception axe X',{mouvement: mouvement, position:position})
+        socket.broadcast.emit('reception axe X',{deplacements: deplacements, position:position})
     })
-
+    // ZONE 1
     socket.on("Zone collision",function(data)
     {
         if (!overload) 
@@ -76,6 +76,23 @@ io.on('connection', function(socket){
     {
         socket.broadcast.emit('communication position',{x:data.x,y:data.y, score:data.score})
     })
+    // ZONE 2 (ZONE MOUVANTE)
+    /*socket.on("Zone2 collision",function(data)
+    {
+        if (!overload) 
+        {
+            overload=true;
+            zone2X = (Math.random()*(data.w-400))-(data.w-400)/2+data.w/2
+            zone2Y = (Math.random()*(data.h-300))-(data.h-300)/2+data.h/2
+            score = data.score + 5
+            socket.emit("mise à jour de la position de la zone2",{x:zone2X, y:zone2Y, score}); 
+            setTimeout(function(){overload=false},200)
+        }
+    })
+    socket.on('transfert position zone2',function(data)
+    {
+        socket.broadcast.emit('communication position zone2',{x:data.x ,y:data.y, score:data.score})
+    })*/
     // RAJOUT LOAN
     socket.on('gameStarted',function()
     {
