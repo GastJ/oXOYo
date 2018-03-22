@@ -62,7 +62,7 @@ function create()
     // Ball
 	ball = createBall();
 	ball.tint = 0x000000;
-	// Zone 
+	// ZONE 1
 	zone = game.add.sprite(300, h/2, "ball"); 
 	zone.anchor.setTo(0.5,0.5);
 	zone.scale.setTo(0.8,0.8);	
@@ -71,25 +71,27 @@ function create()
 	zone.body.setSize(105, 105, 15, 15);
 	zone.body.immovable = true;
 	zone.tint = 0x2a8931;
-	// Moving zone
+
+	// ZONE 2
 	zone2 = game.add.sprite(500, h/2, "ball"); 
     zone2.anchor.setTo(0.5,0.5);
     zone2.scale.setTo(0.8,0.8); 
     game.physics.arcade.enable([zone2]);
+    /*zone.body.setCircle(53);*/
     zone2.body.setSize(105, 105, 15, 15);
-    zone2.body.velocity.setTo(500,500);
+    zone2.body.velocity.setTo(700,800);
     zone2.body.collideWorldBounds = true;
     zone2.body.bounce.set(1);
     zone2.tint = 0x2a1545;
 
-   	// Timer
+	// TIMER
 	var me = this;
 	totalTime = 120;
     startTime = 0;
     me.timeElapsed = 0;
  
     createTimer();
-    // Start the timer
+    // START TIMER
     if (playerID == 1) 
     {
 	    socket.on("startGame", function(socket){
@@ -110,7 +112,8 @@ function create()
 	    startGame = true;
     }
 
-    // Configuration du socket et des handlers
+    // CONFIGURATION DU SOCKET ET DES HANDLERS
+    // ZONE 1
 	socket.on("mise à jour de la position de la zone", function(data)
 	{	
 		score = data.score;
@@ -119,8 +122,15 @@ function create()
 		socket.emit('transfert position', {x:zone.position.x, y:zone.position.y, score:score})
 		
 	})
-	// Moving zone
-	/*socket.on("mise à jour de la position de la zone2", function(data)
+	socket.on('communication position',function(data)
+	{
+		zone.position.x = data.x; 
+		zone.position.y = data.y;
+		score = data.score
+	});
+	// ZONE 2
+	// configuration du socket et des handlers
+    socket.on("mise à jour de la position de la zone2", function(data)
     {   
         score = data.score;
         zone2.position.x = data.x; 
@@ -129,7 +139,13 @@ function create()
         zone2.body.velocity.y = data.y;
         socket.emit('transfert position zone2', {x:zone2.position.x, y:zone2.position.y,x:zone2.body.velocity.x ,y:zone2.body.velocity.y,  score:score})
         
-    })*/
+    })
+    socket.on('communication position zone2',function(data)
+    {
+        zone2.position.x = data.x; 
+        zone2.position.y = data.y;
+        score = data.score
+    });
 	/*socket.on("creation nouvelle dangerZone", function(data){
 		dangerZone = game.add.sprite(data.x, data.y, "ball"); 
 		dangerZone.anchor.setTo(0.5,0.5);
@@ -147,21 +163,7 @@ function create()
 		dangerZone.position.x = data.x; 
 		dangerZone.position.y = data.y;
 	});*/
-	// Position 1st zone
-	socket.on('communication position',function(data)
-	{
-		zone.position.x = data.x; 
-		zone.position.y = data.y;
-		score = data.score
-	});
-	// Position moving zone
-	socket.on('communication position zone2',function(data)
-    {
-        zone2.position.x = data.x; 
-        zone2.position.y = data.y;
-        score = data.score
-    });
-	//Bonus
+	// BONUS
 	socket.on('bonus reception',function(data)
 	{
 		bonus = createBonus(data.x,data.y)
@@ -176,7 +178,7 @@ function create()
 		bonus.kill();
 		totalTime = data.totalTime;
 	})
-	// Malus
+	// MALUS
 	socket.on('malus reception',function(data)
 	{
 		malus = createMalus(data.x,data.y)
@@ -194,12 +196,12 @@ function create()
 	socket.on('reception axe X',function(data)
 	{
 		/*console.log(ball);*/
-		ball.body.velocity.x = data.deplacements;
+		ball.body.velocity.x = data.mouvement;
 		ball.body.position.x = data.position;
 	})
 	socket.on('reception axe Y',function(data)
 	{	/*console.log(ball);*/
-		ball.body.velocity.y = data.deplacements;
+		ball.body.velocity.y = data.mouvement
 		ball.body.position.y = data.position;
 	})
 	/*socket.on('you can move',function()
@@ -301,12 +303,12 @@ var createBall = function()
 		if (ID == 1)
 	    {	
 	        ball.body.velocity.y += value;
-	        socket.emit('Mouvement Y',{mouvement:ball.body.velocity.y, position:ball.body.position.y});
+	        socket.emit('Mouvement Y',{deplacements:ball.body.velocity.y, position:ball.body.position.y});
 	    }
 	    else if (ID == 2)
 	    {
 	        ball.body.velocity.x += value;
-	        socket.emit('Mouvement X',{mouvement:ball.body.velocity.x, position:ball.body.position.x});
+	        socket.emit('Mouvement X',{deplacements:ball.body.velocity.x, position:ball.body.position.x});
 	    }
 
 	    socket.on('reception axe Y',function(data)
@@ -421,7 +423,7 @@ function update(){
 		}
 	}
 	textScore.setText('Score: '+score, {font: "48px Arial", fill: "#fff"});
-	// Highscore
+	// HIGHSCORE
 	highScoreText.setText('Highscore: '+ localStorage.getItem("highscore"), {font: "48px Arial", fill: "#fff"});
 	if (score > localStorage.getItem("highscore"))
     {
