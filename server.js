@@ -5,10 +5,10 @@ let nbPlayer=0
 let players = [0, 0];
 let allClients = [null, null];
 let overload = false;
-/*let bonusEnable=false;*/
 let bonus = false;
 let malus = false;
-/*let dzoverload*/
+const width = 320;
+const height = 480;
 ////Mise a disposition des pages
 
 var app = express();
@@ -24,11 +24,15 @@ server.listen(process.env.PORT || 8080,function(){
     console.log('Listening on '+server.address().port);
 });
 
+
+
 ////Connexion et Web socket
 
 var io = require('socket.io').listen(server);
 
 io.on('connection', function(socket){ 
+    //// CONFIG MAP
+    socket.broadcast.emit('map config', {width:width , height:height});
     console.log('Un nouveau joueur à rejoint le jeu');
 
     let currentPlayer = players.indexOf(0);
@@ -68,13 +72,13 @@ io.on('connection', function(socket){
             zoneX = (Math.random()*(data.w-400))-(data.w-400)/2+data.w/2
             zoneY = (Math.random()*(data.h-300))-(data.h-300)/2+data.h/2
             score = data.score + 1
-            socket.emit("mise à jour de la position de la zone",{x:zoneX, y:zoneY, score}); 
+            socket.emit("MajPos",{x:zoneX, y:zoneY, score}); 
             setTimeout(function(){overload=false},500)
         }
     })
-    socket.on('transfert position',function(data)
+    socket.on('TransfertPos',function(data)
     {
-        socket.broadcast.emit('communication position',{x:data.x,y:data.y, score:data.score})
+        socket.broadcast.emit('ComPos',{x:data.x,y:data.y, score:data.score})
     })
     // ZONE 2
     socket.on("Zone2 collision",function(data)
@@ -85,56 +89,44 @@ io.on('connection', function(socket){
             zone2X = (Math.random()*(data.w-400))-(data.w-400)/2+data.w/2
             zone2Y = (Math.random()*(data.h-300))-(data.h-300)/2+data.h/2
             score = data.score + 5
-            socket.emit("mise à jour de la position de la zone2",{x:zone2X, y:zone2Y, score}); 
+            socket.emit("MajPos2",{x:zone2X, y:zone2Y, score}); 
             setTimeout(function(){overload=false},500)
         }
     })
-    socket.on('transfert position zone2',function(data)
+    socket.on('TransfertPos2',function(data)
     {
-        socket.broadcast.emit('communication position zone2',{x:data.x ,y:data.y, score:data.score})
+        socket.broadcast.emit('ComPos2',{x:data.x ,y:data.y, score:data.score})
     })
-    // RAJOUT LOAN
+
     socket.on('gameStarted',function()
     {
         /*bonusEnable=true;*/
         /*socket.broadcast.emit('you can move')*/
     })
     // BONUS
-    socket.on('bonus communication',function(data)
+    socket.on('emitBonus',function(data)
     {
-        socket.broadcast.emit('bonus reception',{x:data.x,y:data.y,status:data.status})
+        let x = (Math.random()*(data.w-200))+100
+        let y = (Math.random()*(data.h-200))+100
+        socket.broadcast.emit("createBonus",{x:x,y:y})
+        socket.emit("createBonus",{x:x,y:y})
     })
     socket.on('bonus collision',function(data)
     {
         socket.broadcast.emit('bonus removed', {totalTime:data.totalTime})
     })
     // MALUS
-    socket.on('malus communication',function(data)
+    socket.on('emitMalus',function(data)
     {
-        socket.broadcast.emit('malus reception',{x:data.x,y:data.y,status:data.status})
+        let x = (Math.random()*(data.w-200))+100
+        let y = (Math.random()*(data.h-200))+100
+        socket.broadcast.emit("createMalus",{x:x,y:y})
+        socket.emit("createMalus",{x:x,y:y})
     })
     socket.on('malus collision',function(data)
     {
         socket.broadcast.emit('malus removed', {totalTime:data.totalTime})
-    })
-    // DANGER ZONE
-    /*socket.on("dangerZone creation",function(data)
-    {
-        if (!dzoverload)
-        {
-            dzoverload=true;
-            let zoneX = (Math.random()*(data.w-400))-(data.w-400)/2+data.w/2
-            let zoneY = (Math.random()*(data.h-300))-(data.h-300)/2+data.h/2
-            socket.emit("creation nouvelle dangerZone",{x:zoneX, y:zoneY}); 
-            setTimeout(function(){dzoverload=false},500)
-        }
-    })*/
-
-
-    /*socket.on('transfert position dangerZone',function(data)
-    {
-        socket.broadcast.emit('creation nouvelle dangerZone',{x:data.x,y:data.y})
-    })*/
+})
 
     socket.on('disconnect', function(){
         console.log('Déconnexion')

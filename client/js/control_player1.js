@@ -8,9 +8,12 @@ var updatePlayer1 = function(){
     {
         deplacements = 20;
     }
-    gyro.frequency = 10;
-    gyro.startTracking(function(o) {
-        deplacements = o.gamma/150;
-    });
+    else
+    {
+        deplacements += gyroMove.y;
+        if(gyroMove.y == 0){
+            deplacements += gyroMove.beta;
+        }
+    }
     ball.update(deplacements, playerID);
 }

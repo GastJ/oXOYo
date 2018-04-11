@@ -1,6 +1,17 @@
+@font-face {
+    font-family: "Golden";
+    src: url('../assets/fonts/golden.TTF');
+}
 body {
-    font: 16px/1.4em 'PT Sans', sans-serif;;
+    font-family: "Golden",Arial, sans-serif;
     color: #1c1c1c;
+    background-image: url('../assets/images/goldMine2.png');
+    background-size: 100%; 
+    background-position: 50% 15%;
+    background-repeat: no-repeat;
+    vertical-align: middle;
+    text-align: center;
+    overflow: hidden;
 }
  
 p,
@@ -18,47 +29,9 @@ a {
 }
  
 h1 {
- 
+    color: #fff;
+    font-size: 2em;
 }
- 
-h2 {
-    font-family: 'PT Serif', serif;
-    font-size: 32px;
-    line-height: 1.4em;
-    margin: 0 0 .4em;
-    font-weight: bold;
-}
- 
-/*layout*/
- 
-.wrapper {
-}
- 
-article {
-    border-bottom: 1px solid #d8d8d8;
-    padding: 10px 20px 0 20px;
-    margin: 10px 0;
-}
- 
-/*header*/
- 
-header {
-    background: #1c1c1c;
-    padding: 15px 20px;
-}
-        header:before,
-        header:after {
-            content:"";
-            display:table;
-        }
- 
-        header:after {
-            clear:both;
-        }
- 
-        header {
-            zoom:1;
-        }
  
 h1.logo a {
     color: #d8d8d8;
@@ -93,10 +66,11 @@ a.to_nav:focus {
     color: #1c1c1c;
     background: #ccc;
 }
+
 #primary_nav ul {
     list-style: none;
     background: #1c1c1c;
-    padding: 5px 0;
+    padding: 0 0;
 }
  
 #primary_nav li a {
@@ -108,8 +82,8 @@ a.to_nav:focus {
     text-transform: uppercase;
     letter-spacing: 0.1em;
     letter-spacing: 0.1em;
-    line-height: 2em;
-    height: 2em;
+    line-height: 3em;
+    height: 3em;
     border-bottom: 1px solid #383838;
 }
  
@@ -121,4 +95,18 @@ a.to_nav:focus {
 #primary_nav li a:focus {
     color: #1c1c1c;
     background: #ccc;
+}
+.retour_page {
+    
+    width: 200px;
+    float: right;
+
+}
+.credits {
+    width: 65%;
+    margin-left: 200px;
+}
+.infos {
+    width: 65%;
+    margin-left: 200px;
 }

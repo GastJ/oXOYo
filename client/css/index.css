@@ -1,0 +1,7 @@
+@font-face {
+	font-family: "Golden";
+	src: url('../assets/fonts/golden.TTF');
+}
+body{
+	font-family: "Golden",Arial, sans-serif;
+}

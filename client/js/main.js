@@ -13,11 +13,11 @@ socket.on('playerNumber',function(data)
 	console.log("Load player " + data.ball);
 	let control = ""; 
         if(playerID == 1)
-            {control = "↑ et ↓"}
+            {control = "↑ & ↓"}
         else if(playerID)
-            {control = "← et →"}
+            {control = "← & →"}
 
-        let controlText = game.add.text(15,75, "Vos contrôles sont : "+control, {font: "36px Arial", fill: "#fff"});
+        let controlText = game.add.text(game.width*0.015, game.height*0.1, "Vos contrôles sont : "+control, {font: "36px Golden", fill: "#fff"});
         controlText.fixedToCamera = true;
 });
 socket.on('startGame',function()
