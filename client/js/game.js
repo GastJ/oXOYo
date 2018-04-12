@@ -1,7 +1,7 @@
 let w = window.innerWidth;
 let h = window.innerHeight;
 let game = new Phaser.Game(
-	"100%", "100%", Phaser.CANVAS, 'game', { preload: preload, create: create, update: update, render: render}
+	1920, 960, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update, render: render}
 );
 let ball = null;
 let bonus = false;
@@ -19,9 +19,7 @@ function preload()
 	game.load.image("ball", "assets/images/ball.png");
 	game.load.image("pickaxe", "assets/images/double_pickaxe.png");
 	game.load.image("nugget", "assets/images/nugget.png");
-	game.load.image("minecart", "assets/images/minecart.png");
-	game.load.image("ball_shadow", "assets/images/Sprite_Shadow.png");
-	game.load.image("ball_bloom", "assets/images/Sprite_Bloom.png"); 
+	game.load.image("minecart", "assets/images/minecart.png"); 
 	game.load.image("bonus","assets/images/bonus2.png");
 	game.load.image("malus","assets/images/malus2.png");
 	game.load.audio("picking", "assets/sounds/picking.ogg");
@@ -34,8 +32,8 @@ function goFullScreen(){
 	game.stage.disableVisibilityChange = true;
 	game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 	game.scale.pageAlignHorizontally = true;
-	game.scale.pageAlignVertically = true;
-	/*game.scale.setScreenSize(true);*/
+	game.scale.pageAlignVertically = true; 
+	/*game.scale.setScreenSize(true);*/ 
 }
 function create()
 {
@@ -43,7 +41,6 @@ function create()
 	/*game.stage.backgroundColor = "#4488AA";*/
 	// fond
 	background = game.add.sprite(0,0,"cave");
-	goFullScreen();
     // Score 
     textScore = game.add.text((game.width/2.2) ,game.height*0.02,'Score: '+score, {font: "36px Golden", fill: "#fff"});
     textScore.fixedToCamera = true;
@@ -59,19 +56,19 @@ function create()
 	// ZONE 1
 	zone = game.add.sprite(game.width*0.3, game.height/2, "nugget"); 
 	zone.anchor.setTo(0.5,0.5);
-	zone.scale.setTo(0.8,0.8);	
+	zone.scale.setTo(1,1);	
 	game.physics.arcade.enable([zone]);
 	/*zone.body.setCircle(53);*/
-	zone.body.setSize(105, 105, 15, 15);
+	zone.body.setSize(105, 105, 0, 0);
 	zone.body.immovable = true;
 	/*zone.tint = 0x43F04E;*/
 
 	// ZONE 2
 	zone2 = game.add.sprite(game.width/1.3, game.height/2, "minecart"); 
     zone2.anchor.setTo(0.5,0.5);
-    zone2.scale.setTo(0.8,0.8); 
+    zone2.scale.setTo(1.5,1.5); 
     game.physics.arcade.enable([zone2]);
-    zone2.body.setSize(105, 105, 15, 15);
+    zone2.body.setSize(90, 90, 0, 0);
     zone2.body.velocity.setTo(300,300);
     zone2.body.collideWorldBounds = true;
     zone2.body.bounce.set(1);
@@ -147,6 +144,7 @@ function create()
 		ball.body.velocity.y = data.mouvement;
 		ball.body.position.y = data.position;
 	})
+	goFullScreen();
 };
 /*function resize(){
 	textScore.x = Math.round((game.width-textScore.width)/2);
@@ -160,9 +158,9 @@ var createBonus = function(x,y)
 {
 	let bonus = game.add.sprite(x,y,"bonus")
 	bonus.anchor.setTo(.5,.5);
-	bonus.scale.setTo(.45,.45);
+	bonus.scale.setTo(.75,.75);
 	game.physics.arcade.enable(bonus);
-	bonus.body.setCircle(53);
+	bonus.body.setCircle(55, 5, 10);
 	bonus.body.immovable=true;
 	return bonus;
 }
@@ -170,9 +168,9 @@ var createMalus = function(x,y)
 {
 	let malus = game.add.sprite(x,y,"malus")
 	malus.anchor.setTo(.5,.5);
-	malus.scale.setTo(.45,.45);
+	malus.scale.setTo(.75,.75);
 	game.physics.arcade.enable(malus);
-	malus.body.setCircle(53);
+	malus.body.setCircle(55, 5, 10);
 	malus.body.immovable=true;
 	return malus;
 }
@@ -221,7 +219,7 @@ function updateTimer()
 var createBall = function()
 {
 	/*let ball_shadow = game.add.sprite(w/2, h/2,"ball_shadow");*/
-	let ball = game.add.sprite(w/2, h/2,"pickaxe");
+	let ball = game.add.sprite(1920/2, 1080/2,"pickaxe");
 	/*let ball_bloom = game.add.sprite(w/2, h/2,"ball_bloom");*/
 	game.physics.enable(ball, Phaser.Physics.ARCADE);
 	/*game.physics.enable(ball_shadow, Phaser.Physics.ARCADE);
@@ -235,7 +233,7 @@ var createBall = function()
 	ball_bloom.speed = 400;*/
 	ball.body.collideWorldBounds = true;
 	ball.body.bounce.setTo(.5, .5);
-	ball.scale.setTo(0.4, 0.4);
+	ball.scale.setTo(0.7, 0.7);
 	/*ball_shadow.scale.setTo(0.4,0.4);
 	ball_bloom.scale.setTo(0.15,0.15);*/
 	game.camera.follow(ball, Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
@@ -384,6 +382,9 @@ function update(){
 };
 
 function render(){
-	/*game.debug.body(ball);*/
-	/*game.debug.body(zone);*/
+	/*game.debug.body(ball);
+	game.debug.body(zone);
+	game.debug.body(zone2);
+	game.debug.body(bonus);
+	game.debug.body(malus);*/
 };

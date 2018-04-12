@@ -97,16 +97,24 @@ a.to_nav:focus {
     background: #ccc;
 }
 .retour_page {
-    
     width: 200px;
     float: right;
+}
+.credits, .infos {
+    width: 65%;
+    margin-left: 200px;
+}
 
-}
-.credits {
-    width: 65%;
-    margin-left: 200px;
-}
-.infos {
-    width: 65%;
-    margin-left: 200px;
+@media only screen and (max-width: 800px){
+    body{
+        background-size: 300% !important;
+    }
+    .credits, .infos{
+        width: 100%;
+        margin-left: 0 !important;
+    }
+    .retour_page{
+        width: 2em !important;
+        float: none !important;
+    }
 }

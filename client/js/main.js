@@ -17,7 +17,7 @@ socket.on('playerNumber',function(data)
         else if(playerID)
             {control = "← & →"}
 
-        let controlText = game.add.text(game.width*0.015, game.height*0.1, "Vos contrôles sont : "+control, {font: "36px Golden", fill: "#fff"});
+        let controlText = game.add.text(game.width*0.015, game.height*0.1, "Vos controles sont : "+control, {font: "36px Golden", fill: "#fff"});
         controlText.fixedToCamera = true;
 });
 socket.on('startGame',function()
