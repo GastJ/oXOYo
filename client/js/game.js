@@ -28,6 +28,7 @@ function preload()
 	game.load.image("menu", "assets/images/menu.png");
 	game.load.audio("picking", "assets/sounds/picking.ogg");
 	game.load.audio("minecartHit", "assets/sounds/minecartHit.ogg");
+	game.load.audio("gameOver", "assets/sounds/gameOver.ogg");
 };
 function goFullScreen(){
 	// setting a background color
@@ -38,6 +39,7 @@ function goFullScreen(){
 	game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 	game.scale.pageAlignHorizontally = true;
 	game.scale.pageAlignVertically = true; 
+	
 	/*game.scale.setScreenSize(true);*/ 
 }
 function create()
@@ -47,15 +49,16 @@ function create()
 	// fond
 	background = game.add.sprite(0,0,"cave");
     // Score 
-    textScore = game.add.text((game.width/2.2) ,game.height*0.02,'Score: '+score, {font: "36px Golden", fill: "#fff"});
+    textScore = game.add.text((game.width/2.2) ,game.height*0.02,'Score: '+score, {font: "48px Golden", fill: "#fff"});
     textScore.fixedToCamera = true;
     // Highscore
     highScoreString = "Highscore : "
-    highScoreText = game.add.text(game.width/1.26, game.height*0.02, highScoreString + localStorage.getItem("highscore"), { font: '36px Golden', fill: '#fff'});
+    highScoreText = game.add.text(game.width/1.26, game.height*0.02, highScoreString + localStorage.getItem("highscore"), { font: '48px Golden', fill: '#fff'});
     highScoreText.fixedToCamera = true;
     // Sons
     picking = game.add.audio('picking', 0.4);
     minecartHit = game.add.audio('minecartHit', 0.4);
+    gameOver = game.add.audio('gameOver', 0.4);
     // Ball
 	ball = createBall();
 	/*ball.tint = 0x000000;*/
@@ -200,7 +203,7 @@ function createTimer()
 {
     var me = this;
  
-    me.timeLabel = game.add.text(game.width*0.055, game.height*0.02, "00:00", {font: "36px Golden", fill: "#fff"});
+    me.timeLabel = game.add.text(game.width*0.055, game.height*0.02, "00:00", {font: "48px Golden", fill: "#fff"});
     me.timeLabel.anchor.setTo(0.5, 0);
     me.timeLabel.align = 'center';
  
@@ -231,16 +234,19 @@ function updateTimer()
     //Display secondes, add a 0 to the start if less than 10
     result += (secondes < 10) ? ":0" + secondes : ":" + secondes;
     me.timeLabel.text = result;
-
+    if (me.timeElapsed > totalTime -3 && me.timeElapsed < totalTime -2.9){
+    	gameOver.play();
+    }
     if (me.timeElapsed >= totalTime) 
     {	
     	game.paused = true;
     	me.timeLabel.text = "00:00";
-    	console.log("ADD SPRITES MOTHERFUCKER");
 	    // TIME'S UP
 	    timesUp = game.add.sprite(1920/2, 960/2, 'timesUp');
 	    timesUp.anchor.setTo(0.5, 0.5);
 	    timesUp.visible = true;
+	    textScore = game.add.text( -88, -460,'Score: '+score, {font: "48px Golden", fill: "#fff"});
+	    timesUp.addChild(textScore);
     	// Bouton Retry
 	    gameRetry = game.add.button(1920/2, 960/1.5, 'retry', callIndex);
 	    gameRetry.anchor.set(0.5,0.5);
