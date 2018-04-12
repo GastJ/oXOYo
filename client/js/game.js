@@ -39,8 +39,17 @@ function goFullScreen(){
 	game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 	game.scale.pageAlignHorizontally = true;
 	game.scale.pageAlignVertically = true; 
-	
+	game.scale.forceOrientation(false, true);
+    game.scale.leaveIncorrectOrientation.add(handleCorrect);
 	/*game.scale.setScreenSize(true);*/ 
+}
+function handleCorrect(){
+		if(!game.device.desktop){
+			gameRatio = window.innerWidth/window.innerHeight;		
+			game.width = Math.ceil(640*gameRatio);
+			game.height = 640;
+			game.renderer.resize(game.width,game.height);
+		}
 }
 function create()
 {
