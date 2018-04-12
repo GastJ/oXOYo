@@ -29,6 +29,7 @@ server.listen(process.env.PORT || 8080,function(){
 var io = require('socket.io').listen(server);
 
 io.on('connection', function(socket){ 
+    //// CONFIG MAP
     console.log('Un nouveau joueur à rejoint le jeu');
 
     let currentPlayer = players.indexOf(0);
@@ -65,8 +66,8 @@ io.on('connection', function(socket){
         if (!overload) 
         {
             overload=true;
-            zoneX = (Math.random()*(data.w-400))-(data.w-400)/2+data.w/2
-            zoneY = (Math.random()*(data.h-300))-(data.h-300)/2+data.h/2
+            zoneX = (Math.random()*(data.w-(data.w/100*20)))+data.w/100*10
+            zoneY = (Math.random()*(data.h-(data.h/100*20)))+data.h/100*10
             score = data.score + 1
             socket.emit("MajPos",{x:zoneX, y:zoneY, score}); 
             setTimeout(function(){overload=false},500)
@@ -79,8 +80,8 @@ io.on('connection', function(socket){
     // MINECART
     socket.on('emitMinecart',function(data)
     {
-        let x = (Math.random()*(data.w-200))+100;
-        let y = (Math.random()*(data.h-200))+100;
+        let x = (Math.random()*(data.w-(data.w/100*20)))+data.w/100*10
+        let y = (Math.random()*(data.h-(data.h/100*20)))+data.h/100*10
         let speedX = (Math.random()*300)+100;
         let speedY = (Math.random()*300)+100;
         socket.broadcast.emit("createMinecart",{x:x,y:y,speedX:speedX,speedY:speedY})
@@ -100,8 +101,8 @@ io.on('connection', function(socket){
     // BONUS
     socket.on('emitBonus',function(data)
     {
-        let x = (Math.random()*(data.w-200))+100
-        let y = (Math.random()*(data.h-200))+100
+        let x = (Math.random()*(data.w-(data.w/100*20)))+data.w/100*10
+        let y = (Math.random()*(data.h-(data.h/100*20)))+data.h/100*10
         socket.broadcast.emit("createBonus",{x:x,y:y})
         socket.emit("createBonus",{x:x,y:y})
     })
@@ -112,8 +113,8 @@ io.on('connection', function(socket){
     // MALUS
     socket.on('emitMalus',function(data)
     {
-        let x = (Math.random()*(data.w-200))+100
-        let y = (Math.random()*(data.h-200))+100
+        let x = (Math.random()*(data.w-(data.w/100*20)))+data.w/100*10
+        let y = (Math.random()*(data.h-(data.h/100*20)))+data.h/100*10
         socket.broadcast.emit("createMalus",{x:x,y:y})
         socket.emit("createMalus",{x:x,y:y})
     })
