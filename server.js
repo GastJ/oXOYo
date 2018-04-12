@@ -7,8 +7,6 @@ let allClients = [null, null];
 let overload = false;
 let bonus = false;
 let malus = false;
-const width = 320;
-const height = 480;
 ////Mise a disposition des pages
 
 var app = express();
@@ -31,8 +29,6 @@ server.listen(process.env.PORT || 8080,function(){
 var io = require('socket.io').listen(server);
 
 io.on('connection', function(socket){ 
-    //// CONFIG MAP
-    socket.broadcast.emit('map config', {width:width , height:height});
     console.log('Un nouveau joueur à rejoint le jeu');
 
     let currentPlayer = players.indexOf(0);
@@ -80,22 +76,20 @@ io.on('connection', function(socket){
     {
         socket.broadcast.emit('ComPos',{x:data.x,y:data.y, score:data.score})
     })
-    // ZONE 2
-    socket.on("Zone2 collision",function(data)
+    // MINECART
+    socket.on('emitMinecart',function(data)
     {
-        if (!overload) 
-        {
-            overload=true;
-            zone2X = (Math.random()*(data.w-400))-(data.w-400)/2+data.w/2
-            zone2Y = (Math.random()*(data.h-300))-(data.h-300)/2+data.h/2
-            score = data.score + 5
-            socket.emit("MajPos2",{x:zone2X, y:zone2Y, score}); 
-            setTimeout(function(){overload=false},500)
-        }
+        let x = (Math.random()*(data.w-200))+100;
+        let y = (Math.random()*(data.h-200))+100;
+        let speedX = (Math.random()*300)+100;
+        let speedY = (Math.random()*300)+100;
+        socket.broadcast.emit("createMinecart",{x:x,y:y,speedX:speedX,speedY:speedY})
+        socket.emit("createMinecart",{x:x,y:y,speedX:speedX,speedY:speedY})
     })
-    socket.on('TransfertPos2',function(data)
+    socket.on("minecart collision",function(data)
     {
-        socket.broadcast.emit('ComPos2',{x:data.x ,y:data.y, score:data.score})
+        socket.broadcast.emit('minecartRemove');
+        socket.emit('minecartRemove');
     })
 
     socket.on('gameStarted',function()

@@ -6,6 +6,7 @@ let game = new Phaser.Game(
 let ball = null;
 let bonus = false;
 let malus = false;
+let minecart = false;
 let zone = null; 
 let score = 0;
 let highscore = 0;
@@ -22,7 +23,11 @@ function preload()
 	game.load.image("minecart", "assets/images/minecart.png"); 
 	game.load.image("bonus","assets/images/bonus2.png");
 	game.load.image("malus","assets/images/malus2.png");
+	game.load.image("timesUp", "assets/images/timesUp.png");
+	game.load.image("retry", "assets/images/retry.png");
+	game.load.image("menu", "assets/images/menu.png");
 	game.load.audio("picking", "assets/sounds/picking.ogg");
+	game.load.audio("minecartHit", "assets/sounds/minecartHit.ogg");
 };
 function goFullScreen(){
 	// setting a background color
@@ -50,6 +55,7 @@ function create()
     highScoreText.fixedToCamera = true;
     // Sons
     picking = game.add.audio('picking', 0.4);
+    minecartHit = game.add.audio('minecartHit', 0.4);
     // Ball
 	ball = createBall();
 	/*ball.tint = 0x000000;*/
@@ -63,23 +69,22 @@ function create()
 	zone.body.immovable = true;
 	/*zone.tint = 0x43F04E;*/
 
-	// ZONE 2
-	zone2 = game.add.sprite(game.width/1.3, game.height/2, "minecart"); 
-    zone2.anchor.setTo(0.5,0.5);
-    zone2.scale.setTo(1.5,1.5); 
-    game.physics.arcade.enable([zone2]);
-    zone2.body.setSize(90, 90, 0, 0);
-    zone2.body.velocity.setTo(300,300);
-    zone2.body.collideWorldBounds = true;
-    zone2.body.bounce.set(1);
-    /*zone2.tint = 0x2a1545;*/
+    // Bouton Retry
+    gameRetry = game.add.sprite(1920/2, 960/2, "retry");
+    gameRetry.anchor.set(0.5,0.5);
+    gameRetry.visible = false;
+
+    // Bouton Menu
+    gameMenu = game.add.sprite(-1600, game.camera.y+400, 'menu');
+    gameMenu.anchor.set(0.5,0.5);
+    gameMenu.visible = false;
 
 	// TIMER
 	var me = this;
 	totalTime = 120;
     startTime = 0;
     me.timeElapsed = 0;
- 
+
     createTimer();
     // START TIMER
     socket.on("startGame", function(socket){
@@ -144,16 +149,17 @@ function create()
 		ball.body.velocity.y = data.mouvement;
 		ball.body.position.y = data.position;
 	})
+	socket.on('createMinecart',function(data)
+	{
+		createMinecart(data.x,data.y,data.speedX,data.speedY)
+	})
+	socket.on('minecartRemove',function(data)
+	{
+		minecart.kill();
+		score+=5;
+	})
 	goFullScreen();
 };
-/*function resize(){
-	textScore.x = Math.round((game.width-textScore.width)/2);
-	textScore.y = game.height;
-	highScoreText.x = Math.round((game.width-highScoreText.width)/2);
-	highScoreText.y = game.height;
-	timeLabel.x = Math.round((game.width-timeLabel.width)/2);
-	timeLabel.y = game.height;
-}*/
 var createBonus = function(x,y)
 {
 	let bonus = game.add.sprite(x,y,"bonus")
@@ -174,12 +180,27 @@ var createMalus = function(x,y)
 	malus.body.immovable=true;
 	return malus;
 }
+var createMinecart = function(x,y,sx,sy)
+{
+	// ZONE 2
+	minecart = true;
+	minecart = game.add.sprite(x, y, "minecart"); 
+    minecart.anchor.setTo(0.5,0.5);
+    minecart.scale.setTo(1.5,1.5); 
+    game.physics.arcade.enable([minecart]);
+    minecart.body.setSize(90, 85);
+    minecart.body.velocity.setTo(sx,sy);
+    minecart.body.collideWorldBounds = true;
+    minecart.body.bounce.set(1);
+    /*minecart.tint = 0x2a1545;*/
+    return minecart;
+}
+
 function createTimer()
 {
     var me = this;
  
     me.timeLabel = game.add.text(game.width*0.055, game.height*0.02, "00:00", {font: "36px Golden", fill: "#fff"});
-    me.timeLabel.fixedToCamera = true;
     me.timeLabel.anchor.setTo(0.5, 0);
     me.timeLabel.align = 'center';
  
@@ -212,30 +233,41 @@ function updateTimer()
     me.timeLabel.text = result;
 
     if (me.timeElapsed >= totalTime) 
-    {
-    	game.time.events.remove(gameTimer)
+    {	
+    	game.paused = true;
+    	me.timeLabel.text = "00:00";
+    	console.log("ADD SPRITES MOTHERFUCKER");
+	    // TIME'S UP
+	    timesUp = game.add.sprite(1920/2, 960/2, 'timesUp');
+	    timesUp.anchor.setTo(0.5, 0.5);
+	    timesUp.visible = true;
+    	// Bouton Retry
+	    gameRetry = game.add.button(1920/2, 960/1.5, 'retry', callIndex);
+	    gameRetry.anchor.set(0.5,0.5);
+	    gameRetry.visible = true;
+
+	    // Bouton Menu
+	    gameMenu = game.add.button(1920/2, 960/1.2, 'menu', callMenu);
+	    gameMenu.anchor.set(0.5,0.5);
+	    gameMenu.visible = true;
     }
+}
+function callMenu(){
+    document.location.href="menu.html";
+}
+function callIndex(){
+    document.location.href="index.html";
 }
 var createBall = function()
 {
-	/*let ball_shadow = game.add.sprite(w/2, h/2,"ball_shadow");*/
-	let ball = game.add.sprite(1920/2, 1080/2,"pickaxe");
-	/*let ball_bloom = game.add.sprite(w/2, h/2,"ball_bloom");*/
+	let ball = game.add.sprite(1920/2, 960/2,"pickaxe");
 	game.physics.enable(ball, Phaser.Physics.ARCADE);
-	/*game.physics.enable(ball_shadow, Phaser.Physics.ARCADE);
-	game.physics.enable(ball_bloom, Phaser.Physics.ARCADE);*/
 	cursors = game.input.keyboard.createCursorKeys();
-	/*ball_shadow.anchor.setTo(0.5,0.5);*/
 	ball.anchor.setTo(0.5, 0.5);
-	/*ball_bloom.anchor.setTo(0.5,0.5);*/
 	ball.speed = 400;
-	/*ball_shadow.speed = 400;
-	ball_bloom.speed = 400;*/
 	ball.body.collideWorldBounds = true;
 	ball.body.bounce.setTo(.5, .5);
 	ball.scale.setTo(0.7, 0.7);
-	/*ball_shadow.scale.setTo(0.4,0.4);
-	ball_bloom.scale.setTo(0.15,0.15);*/
 	game.camera.follow(ball, Phaser.Camera.FOLLOW_LOCKON, 0.1, 0.1);
 	gyro.startTracking(function(o) {
        // updating player velocity
@@ -256,27 +288,6 @@ var createBall = function()
 	        ball.body.velocity.x += value;
 	        socket.emit('Mouvement X',{deplacements:ball.body.velocity.x, position:ball.body.position.x});
 	    }
-	    	/*ball_bloom.body.velocity.x=ball.body.velocity.x*0.98
-	    	ball_bloom.body.velocity.y=ball.body.velocity.y*0.98
-	    	ball_shadow.body.velocity.x=ball.body.velocity.x*1.02
-	    	ball_shadow.body.velocity.y=ball.body.velocity.y*1.02
-	       // updating ball velocity
-	      	if (ball_shadow.x!==(ball.x-window.innerWidth*0.5)*1.02+window.innerWidth*0.5) 
-	      	{
-	    		ball_shadow.x=(ball.x-window.innerWidth*0.5)*1.02+window.innerWidth*0.5
-	      	}
-	      	if (ball_shadow.y!==(ball.y-window.innerHeight*0.5)*1.02+window.innerHeight*0.5) 
-	      	{
-	    		ball_shadow.y=(ball.y-window.innerHeight*0.5)*1.02+window.innerHeight*0.5
-	      	}
-	      	if (ball_bloom.x!==(ball.x-window.innerWidth*0.5)*0.98+window.innerWidth*0.5) 
-	      	{
-	    		ball_bloom.x=(ball.x-window.innerWidth*0.5)*0.98+window.innerWidth*0.5
-	      	}
-	      	if (ball_bloom.y!==(ball.y-window.innerHeight*0.5)*0.98+window.innerHeight*0.5) 
-	      	{
-	    		ball_bloom.y=(ball.y-window.innerHeight*0.5)*0.98+window.innerHeight*0.5
-	      	}*/
 	}
 	return ball;
 }
@@ -307,28 +318,12 @@ function collisionHandler()
 }
 function collisionHandler2()
 {	
+	minecartHit.play();
+    score+=5;
+	minecart.kill();
+	minecart = false;
     console.log("collision2");
-    socket.emit("Zone2 collision", {w:w, h:h, score:score});
-    if (score >= localStorage.getItem("highscore")) 
-    {
-        highScoreText.text = highScoreString + score;
-    }
-    socket.on("MajPos2", function(data)
-    {   
-        score = data.score;
-        zone2.position.x = data.x; 
-        zone2.position.y = data.y;  
-        zone2.body.velocity.x = data.x; 
-        zone2.body.velocity.y = data.y;
-        socket.emit('TransfertPos2', {x:zone2.position.x, y:zone2.position.y,x:zone2.body.velocity.x ,y:zone2.body.velocity.y,  score:score})
-        
-    })
-    socket.on('ComPos2',function(data)
-    {
-        zone2.position.x = data.x; 
-        zone2.position.y = data.y;
-        score = data.score
-    });
+    socket.emit("minecart collision");
 }
 function applyBonus()
 {
@@ -360,6 +355,11 @@ function update(){
 			console.log("malus créé");
 			socket.emit('emitMalus',{w:w, h:h})
 		}
+		if (Math.floor(Math.random()*300)==1&&!minecart)
+		{
+			minecart=true;
+			socket.emit('emitMinecart',{w:w, h:h})
+		}
 		if (playerID==1) 
 		{
 			updatePlayer1();
@@ -376,7 +376,7 @@ function update(){
        localStorage.setItem("highscore", score);
     }
 	game.physics.arcade.collide(ball, zone, collisionHandler, null, this);
-	/*game.physics.arcade.collide(ball, zone2, collisionHandler2, null, this);*/
+	game.physics.arcade.collide(ball, minecart, collisionHandler2, null, this);
 	game.physics.arcade.collide(ball, bonus, applyBonus, null, this);
 	game.physics.arcade.collide(ball, malus, applyMalus, null, this);
 };
@@ -384,7 +384,7 @@ function update(){
 function render(){
 	/*game.debug.body(ball);
 	game.debug.body(zone);
-	game.debug.body(zone2);
+	game.debug.body(minecart);
 	game.debug.body(bonus);
 	game.debug.body(malus);*/
 };
