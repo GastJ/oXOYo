@@ -1,5 +1,5 @@
-let w = window.innerWidth;
-let h = window.innerHeight;
+let w = 1920;
+let h = 960;
 let game = new Phaser.Game(
 	1920, 960, Phaser.CANVAS, 'game', { preload: preload, create: create, update: update, render: render}
 );
@@ -42,18 +42,18 @@ function goFullScreen(){
 	game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 	game.scale.pageAlignHorizontally = true;
 	game.scale.pageAlignVertically = true; 
-	game.scale.forceOrientation(false, true);
-    game.scale.leaveIncorrectOrientation.add(handleCorrect);
+	/*game.scale.forceOrientation(false, true);
+    game.scale.leaveIncorrectOrientation.add(handleCorrect);*/
 	/*game.scale.setScreenSize(true);*/ 
 }
-function handleCorrect(){
+/*function handleCorrect(){
 		if(!game.device.desktop){
 			gameRatio = window.innerWidth/window.innerHeight;		
 			game.width = Math.ceil(640*gameRatio);
 			game.height = 640;
 			game.renderer.resize(game.width,game.height);
 		}
-}
+}*/
 function create()
 {
 	game.physics.startSystem(Phaser.Physics.ARCADE); 
