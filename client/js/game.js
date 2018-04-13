@@ -29,6 +29,9 @@ function preload()
 	game.load.audio("picking", "assets/sounds/picking.ogg");
 	game.load.audio("minecartHit", "assets/sounds/minecartHit.ogg");
 	game.load.audio("gameOver", "assets/sounds/gameOver.ogg");
+	game.load.audio("bonusSound", "assets/sounds/bonus.ogg");
+	game.load.audio("malusSound", "assets/sounds/malus.ogg");
+	game.load.audio("gamesound", "assets/sounds/gamesound.mp3");
 };
 function goFullScreen(){
 	// setting a background color
@@ -65,9 +68,12 @@ function create()
     highScoreText = game.add.text(game.width/1.26, game.height*0.02, highScoreString + localStorage.getItem("highscore"), { font: '48px Golden', fill: '#fff'});
     highScoreText.fixedToCamera = true;
     // Sons
+    gamesound = game.add.audio('gamesound', 0.4, 1);
     picking = game.add.audio('picking', 0.4);
     minecartHit = game.add.audio('minecartHit', 0.4);
     gameOver = game.add.audio('gameOver', 0.4);
+    bonusSound = game.add.audio('bonusSound', 0.4);
+    malusSound = game.add.audio('malusSound', 0.4);
     // Ball
 	ball = createBall();
 	/*ball.tint = 0x000000;*/
@@ -102,6 +108,7 @@ function create()
     socket.on("startGame", function(socket){
 	    	startGame = true;
 			startTime = new Date();
+			gamesound.play();
 		    me.gameTimer = game.time.events.loop(100, function(){
 	        updateTimer();
     	})
@@ -121,6 +128,7 @@ function create()
     {
 	    startGame = true;
     	startTime = new Date();
+    	gamesound.play();
 	    me.gameTimer = game.time.events.loop(100, function(){
 	        updateTimer();
 	    });
@@ -135,7 +143,8 @@ function create()
 		console.log("created bonus");
 	})
 	socket.on('bonus removed',function(data)
-	{
+	{	
+		bonusSound.play();
 		bonus.kill();
 		totalTime = data.totalTime;
 	})
@@ -147,7 +156,8 @@ function create()
 		console.log("malus created");
 	})
 	socket.on('malus removed',function(data)
-	{
+	{	
+		malusSound.play();
 		malus.kill();
 		totalTime = data.totalTime;
 	})
